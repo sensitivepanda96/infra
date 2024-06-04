@@ -64,17 +64,17 @@ resource "aws_security_group" "sg" {
 }
 
 # SSH Key Pair
-resource "aws_key_pair" "deployer" {
-  key_name   = "deployer-key"
+resource "aws_key_pair" "login" {
+  key_name   = "login-key"
   public_key = file("~/.ssh/id_rsa.pub")  # path to your SSH public key
 }
 
 # EC2 Instance
-resource "aws_instance" "web" {
+resource "aws_instance" "host" {
   ami           = "ami-08012c0a9ee8e21c4"  # specify a valid AMI ID for your region
   instance_type = "t2.2xlarge"
 
-  key_name               = aws_key_pair.deployer.key_name
+  key_name               = aws_key_pair.login.key_name
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.sg.id]
 
@@ -87,4 +87,9 @@ resource "aws_instance" "web" {
     volume_size = 128  # GB
     volume_type = "gp3"
   }
+}
+
+output "instanceip" {
+  description = "IP addredd for public endpoint"
+  value = aws_instance.host.public_ip
 }
